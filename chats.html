@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      /* Add your CSS styles for the bars here */
+      .main-heading {
+        font-size: 30px;
+        color: rgb(236, 20, 13);
+        font-weight: bold;
+        text-align: center;
+      }
+      .bar-container {
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+        height: 550px; /* Specify the desired canvas height */
+        background-color: aquamarine;
+        background-size: cover;
+      }
+
+      .bar {
+        width: 20px; /* Specify the desired bar width */
+        background-color: blue;
+        margin-bottom: 8px;
+        margin-right: 3px;
+        transition: height 0.5s; /* Animation speed (adjust as needed) */
+      }
+      .bar-number {
+        position: absolute;
+        bottom: -15px; /* Adjust this value to position the bar number */
+        left: 50%; /* Center the bar number horizontally */
+        transform: translateX(-50%);
+        font-size: 12px; /* Adjust the font size as needed */
+        color: white; /* Text color */
+      }
+    </style>
+  </head>
+  <body>
+    <h1 class="main-heading">Sorting and Randomizing Bars</h1>
+    <div class="bar-container" id="bars-container"></div>
+    <button onclick="randomizeBars()">Randomize Array</button>
+    <button onclick="startSorting('insertionSort')">Insertion Sort</button>
+    <button onclick="startSorting('selectionSort')">Selection Sort</button>
+    <button onclick="startSorting('bubbleSort')">Bubble Sort</button>
+    <button onclick="startSorting('quickSort')">Quick Sort</button>
+    <button onclick="startSorting('mergeSort')">Merge Sort</button>
+    <button onclick="startSorting('shellSort')">Shell Sort</button>
+    <button onclick="changeSize()">Change Size</button>
+    <button onclick="pauseSorting()">Pause Sorting</button>
+    <label for="speed">Animation Speed:</label>
+    <input
+      type="range"
+      id="speed"
+      min="1"
+      max="100"
+      value="50"
+      onchange="adjustSpeed()"
+    />
+    <br />
+
+    <script>
+      // Initialize an array of values for the bars
+      let bars = [
+        90, 6, 56, 58, 82, 33, 15, 34, 41, 80, 10, 24, 74, 67, 27, 54, 49, 19,
+        1, 25, 99, 89, 28, 24, 3, 78, 40, 80, 64, 82, 74, 8, 13, 73, 13, 40, 12,
+        85, 41, 91, 75, 50, 5, 77, 15, 32, 12, 38,
+      ];
+
+      // Variables for controlling sorting
+      let isSorting = false;
+      let isPaused = false;
+      let animationSpeed = 50; // Default animation speed (adjust as needed)
+      let timeoutId;
+      let selectedSort = null;
+
+      // Function to generate bars based on values
+      function generateBars() {
+        const barsContainer = document.getElementById("bars-container");
+        barsContainer.innerHTML = "";
+        for (let value of bars) {
+          const bar = document.createElement("div");
+          bar.className = "bar";
+          bar.style.height = value * 5 + "px";
+          barsContainer.appendChild(bar);
+        }
+      }
+
+      // Call generateBars initially to display bars
+      generateBars();
+
+      // Function to randomize the array
+      function randomizeBars() {
+        if (!isSorting) {
+          bars.sort(() => Math.random() - 0.5);
+          generateBars();
+        }
+      }
+
+      // Function to adjust animation speed
+      function adjustSpeed() {
+        animationSpeed = parseInt(document.getElementById("speed").value);
+      }
+
+      // Function to pause sorting
+      function pauseSorting() {
+        if (isSorting) {
+          isPaused = true;
+          clearTimeout(timeoutId);
+        }
+      }
+
+      // Function to resume sorting
+      function resumeSorting() {
+        if (isSorting) {
+          isPaused = false;
+          startSorting(selectedSort);
+        }
+      }
+
+      // Function to reset sorting
+      function resetSorting() {
+        if (!isSorting) {
+          bars = [10, 5, 15, 8, 3, 12];
+          generateBars();
+        }
+      }
+
+      // Function to change bar sizes
+      function changeSize() {
+        for (let i = 0; i < bars.length; i++) {
+          bars[i] = Math.floor(Math.random() * 20) + 1; // Randomize bar values
+        }
+        generateBars();
+      }
+
+      // Function for Insertion Sort
+      function insertionSort() {
+        for (let i = 1; i < bars.length; i++) {
+          let key = bars[i];
+          let j = i - 1;
+          while (j >= 0 && bars[j] > key) {
+            bars[j + 1] = bars[j];
+            j = j - 1;
+          }
+          bars[j + 1] = key;
+        }
+        generateBars();
+      }
+
+      // Function for Selection Sort
+      function selectionSort() {
+        for (let i = 0; i < bars.length - 1; i++) {
+          let minIndex = i;
+          for (let j = i + 1; j < bars.length; j++) {
+            if (bars[j] < bars[minIndex]) {
+              minIndex = j;
+            }
+          }
+          let temp = bars[i];
+          bars[i] = bars[minIndex];
+          bars[minIndex] = temp;
+        }
+        generateBars();
+      }
+
+      // Function for Bubble Sort
+      function bubbleSort() {
+        let n = bars.length;
+        for (let i = 0; i < n - 1; i++) {
+          for (let j = 0; j < n - i - 1; j++) {
+            if (bars[j] > bars[j + 1]) {
+              let temp = bars[j];
+              bars[j] = bars[j + 1];
+              bars[j + 1] = temp;
+            }
+          }
+        }
+        generateBars();
+      }
+
+      // Function for Quick Sort
+      function quickSort() {
+        function partition(arr, low, high) {
+          let pivot = arr[high];
+          let i = low - 1;
+          for (let j = low; j < high; j++) {
+            if (arr[j] < pivot) {
+              i++;
+              let temp = arr[i];
+              arr[i] = arr[j];
+              arr[j] = temp;
+            }
+          }
+          let temp = arr[i + 1];
+          arr[i + 1] = arr[high];
+          arr[high] = temp;
+          return i + 1;
+        }
+
+        function sort(arr, low, high) {
+          if (low < high) {
+            let pi = partition(arr, low, high);
+            sort(arr, low, pi - 1);
+            sort(arr, pi + 1, high);
+          }
+        }
+
+        sort(bars, 0, bars.length - 1);
+        generateBars();
+      }
+
+      // Function for Merge Sort
+      function mergeSort() {
+        function merge(arr, l, m, r) {
+          let n1 = m - l + 1;
+          let n2 = r - m;
+
+          let L = new Array(n1);
+          let R = new Array(n2);
+
+          for (let i = 0; i < n1; i++) {
+            L[i] = arr[l + i];
+          }
+          for (let j = 0; j < n2; j++) {
+            R[j] = arr[m + 1 + j];
+          }
+
+          let i = 0;
+          let j = 0;
+          let k = l;
+          while (i < n1 && j < n2) {
+            if (L[i] <= R[j]) {
+              arr[k] = L[i];
+              i++;
+            } else {
+              arr[k] = R[j];
+              j++;
+            }
+            k++;
+          }
+
+          while (i < n1) {
+            arr[k] = L[i];
+            i++;
+            k++;
+          }
+
+          while (j < n2) {
+            arr[k] = R[j];
+            j++;
+            k++;
+          }
+        }
+
+        function sort(arr, l, r) {
+          if (l < r) {
+            let m = Math.floor((l + r) / 2);
+            sort(arr, l, m);
+            sort(arr, m + 1, r);
+            merge(arr, l, m, r);
+          }
+        }
+
+        sort(bars, 0, bars.length - 1);
+        generateBars();
+      }
+
+      // Function for Shell Sort
+      function shellSort() {
+        let n = bars.length;
+        for (let gap = Math.floor(n / 2); gap > 0; gap = Math.floor(gap / 2)) {
+          for (let i = gap; i < n; i++) {
+            let temp = bars[i];
+            let j;
+            for (j = i; j >= gap && bars[j - gap] > temp; j -= gap) {
+              bars[j] = bars[j - gap];
+            }
+            bars[j] = temp;
+          }
+        }
+        generateBars();
+      }
+
+      // Function to start sorting
+      let currentStep = 0;
+
+      function startSorting(sortMethod) {
+        if (!isSorting) {
+          isSorting = true;
+          isPaused = false;
+          selectedSort = sortMethod;
+          document.getElementById("speed").disabled = true; // Disable speed adjustment during sorting
+
+          // Start the sorting process based on the selected sort method
+          switch (sortMethod) {
+            case "insertionSort":
+              insertionSort();
+              break;
+            case "selectionSort":
+              selectionSort();
+              break;
+            case "bubbleSort":
+              bubbleSort();
+              break;
+            case "quickSort":
+              quickSort();
+              break;
+            case "mergeSort":
+              mergeSort();
+              break;
+            case "shellSort":
+              shellSort();
+              break;
+            default:
+              break;
+          }
+
+          // Example usage for animation speed control
+          function runNextStep() {
+            if (isPaused) {
+              return;
+            }
+            // Implement sorting step based on the selected sort method
+            switch (sortMethod) {
+              case "insertionSort":
+                // Implement one step of Insertion Sort
+
+                break;
+              case "selectionSort":
+                // Implement one step of Selection Sort
+                break;
+              // Add cases for other sorting methods as needed
+              case "bubbleSort":
+                // Implement one step of Bubble Sort
+                break;
+              case "quickSort":
+                // Implement one step of Quick Sort
+                break;
+              case "mergeSort":
+                // Implement one step of Merge Sort
+                break;
+              case "shellSort":
+                // Implement one step of Shell Sort
+                break;
+
+              default:
+                break;
+            }
+
+            // Check if sorting is completed
+            if (isSorted(bars)) {
+              isSorting = false;
+              selectedSort = null;
+              document.getElementById("speed").disabled = false; // Enable speed adjustment after sorting
+              return;
+            }
+
+            timeoutId = setTimeout(runNextStep, animationSpeed);
+          }
+
+          // Start the sorting process
+          runNextStep();
+        }
+      }
+      // Function to check if an array is sorted
+      function isSorted(arr) {
+        for (let i = 0; i < arr.length - 1; i++) {
+          if (arr[i] > arr[i + 1]) {
+            return false;
+          }
+        }
+        return true;
+      }
+    </script>
+  </body>
+</html>
